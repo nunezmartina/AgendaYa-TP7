@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block titulo %}Agenda de {{ admin.nombre }}{% endblock %}
+{% block contenido %}
+<h1>Agenda de {{ admin.nombre }}</h1>
+<p class="muted">agendaya.com/agenda/dr-garcia · Paso 1 de 3: elegí el tipo de evento</p>
+{% for e in eventos %}
+<div class="card acciones" style="justify-content:space-between">
+  <div><strong>{{ e.nombre }}</strong><br><span class="muted">{{ e.modalidad }} · {{ admin.direccion }}</span></div>
+  <a class="btn" href="{{ url_for('agenda_evento', evento_id=e.id) }}">Elegir</a>
+</div>{% endfor %}
+{% endblock %}

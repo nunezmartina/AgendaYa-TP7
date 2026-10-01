@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block titulo %}{{ 'Nueva plantilla' if modo == 'nueva' else 'Editar plantilla' }}{% endblock %}
+{% block contenido %}
+<h1>{{ 'Nueva plantilla de email' if modo == 'nueva' else 'Editar plantilla: ' ~ datos.nombre }}</h1>
+{% if error_general %}<div class="flash error" id="error-general">{{ error_general }}</div>{% endif %}
+<form method="post" class="card" novalidate>
+<label for="nombre">Nombre de la plantilla <span class="muted">(máx. {{ limites.nombre }})</span></label>
+<input type="text" id="nombre" name="nombre" value="{{ datos.nombre or '' }}" class="{{ 'invalido' if errores.nombre }}">
+{% if errores.nombre %}<div class="error-inline" id="error-nombre">{{ errores.nombre }}</div>{% endif %}
+<label for="tipo">Tipo de notificación</label>
+<select id="tipo" name="tipo" {{ 'disabled' if modo == 'editar' }}>{% for t in tipos %}<option {{ 'selected' if t == datos.tipo }}>{{ t }}</option>{% endfor %}</select>
+{% if modo == 'editar' %}<div class="muted">El tipo de notificación no es editable.</div>{% endif %}
+<label for="asunto">Asunto del email <span class="muted">(máx. {{ limites.asunto }})</span></label>
+<input type="text" id="asunto" name="asunto" value="{{ datos.asunto or '' }}">
+{% if errores.asunto %}<div class="error-inline">{{ errores.asunto }}</div>{% endif %}
+<label for="saludo">Saludo personalizado <span class="muted">(máx. {{ limites.saludo }})</span></label>
+<input type="text" id="saludo" name="saludo" value="{{ datos.saludo or '' }}">
+<label for="cuerpo">Cuerpo adicional <span class="muted">(máx. {{ limites.cuerpo }})</span></label>
+<textarea id="cuerpo" name="cuerpo">{{ datos.cuerpo or '' }}</textarea>
+{% if errores.cuerpo %}<div class="error-inline">{{ errores.cuerpo }}</div>{% endif %}
+<label for="firma">Firma <span class="muted">(máx. {{ limites.firma }})</span></label>
+<input type="text" id="firma" name="firma" value="{{ datos.firma or '' }}">
+<label class="switch"><input type="checkbox" id="por_defecto" name="por_defecto" {{ 'checked' if datos.por_defecto }}> Establecer como plantilla por defecto</label>
+{% if errores.por_defecto %}<div class="error-inline">{{ errores.por_defecto }}</div>{% endif %}
+<p class="muted">Variables disponibles: {nombre_invitado}, {nombre_profesional}, {fecha_turno}, {hora_turno}, {tipo_evento}</p>
+<p class="acciones">
+<button class="btn" type="submit" name="accion" value="guardar">{{ 'Guardar plantilla' if modo == 'nueva' else 'Guardar cambios' }}</button>
+{% if modo == 'editar' %}<button class="btn sec" type="submit" name="accion" value="preview">Vista previa</button>{% endif %}
+<a class="btn sec" href="{{ url_for('plantillas') }}">Volver</a></p>
+</form>
+{% if preview %}<h2>Vista previa (datos de ejemplo)</h2>
+<div class="mail"><div class="cab"><strong>Asunto:</strong> {{ preview.asunto }}</div>
+<div class="cuerpo"><p>{{ preview.saludo }}</p><p>{{ preview.cuerpo }}</p><p>{{ preview.firma }}</p></div></div>{% endif %}
+{% endblock %}

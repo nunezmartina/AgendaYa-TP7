@@ -1,0 +1,2 @@
+{% for a in alertas %}<div class="alerta {{ 'nueva' if not a.leida }}"><span class="tipo {{ a.tipo.split()[0] }}">{{ a.tipo }}</span> · {{ a.texto }}<br><span class="muted">{{ a.creada_en|fh }}{% if not a.leida %} · no leída{% endif %}</span></div>
+{% else %}<p class="muted">No hay notificaciones.</p>{% endfor %}

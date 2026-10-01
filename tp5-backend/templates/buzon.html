@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block titulo %}Buzón de pruebas{% endblock %}
+{% block contenido %}
+<h1>Buzón de pruebas</h1>
+<form class="card acciones" method="get"><label style="margin:0;flex:1">Bandeja de <input type="email" name="email" value="{{ email }}" list="dest"></label>
+<datalist id="dest">{% for d in destinatarios %}<option>{{ d }}</option>{% endfor %}</datalist>
+<button class="btn" type="submit">Abrir bandeja</button></form>
+{% if email %}<table class="tabla"><tr><th>Recibido</th><th>Asunto</th><th>Tipo</th></tr>
+{% for m in mensajes %}<tr><td>{{ m.enviada_en|fh }}</td><td><a href="{{ url_for('buzon_mensaje', nid=m.id) }}">{{ m.asunto }}</a></td><td>{{ m.tipo }}</td></tr>
+{% else %}<tr><td colspan="3" class="muted" id="bandeja-vacia">La bandeja de {{ email }} está vacía.</td></tr>{% endfor %}</table>{% endif %}
+{% endblock %}

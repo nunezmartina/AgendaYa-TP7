@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgendaYA — M06 Notificaciones (Frontend mínimo TP6)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>AgendaYA · Módulo M06 — Notificaciones y Comunicaciones</h1>
+    <nav class="tabs">
+      <button data-cy="tab-plantillas" class="tab-btn active" data-target="vista-plantillas">
+        Plantillas de Email
+      </button>
+      <button data-cy="tab-simular" class="tab-btn" data-target="vista-simular">
+        Simular envío de notificación
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============================================================ -->
+    <!-- FLUJO OBLIGATORIO 1: Configurar plantilla de email (ABM ALTA) -->
+    <!-- ============================================================ -->
+    <section id="vista-plantillas" class="vista">
+      <h2>Gestión de Plantillas de Email</h2>
+      <p class="ayuda">Cada tipo de notificación debe tener exactamente una plantilla por defecto (★).</p>
+
+      <form id="form-plantilla" novalidate>
+        <div class="campo">
+          <label for="nombre-input">Nombre de la plantilla *</label>
+          <input data-cy="nombre-input" id="nombre-input" type="text" maxlength="80" placeholder="Ej: Confirmación — Tono formal" />
+        </div>
+
+        <div class="campo">
+          <label for="tipo-select">Tipo de notificación *</label>
+          <select data-cy="tipo-select" id="tipo-select">
+            <option value="confirmacion">Email de confirmación al invitado</option>
+            <option value="recordatorio">Email de recordatorio al invitado</option>
+            <option value="cancelacion">Email de cancelación al invitado</option>
+            <option value="nueva_reserva_admin">Notificación al admin (nueva reserva)</option>
+            <option value="cancelacion_admin">Notificación al admin (cancelación)</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="asunto-input">Asunto del email *</label>
+          <input data-cy="asunto-input" id="asunto-input" type="text" maxlength="100" placeholder="Ej: Tu turno con {nombre_profesional} está confirmado" />
+        </div>
+
+        <div class="campo">
+          <label for="saludo-input">Saludo personalizado *</label>
+          <input data-cy="saludo-input" id="saludo-input" type="text" maxlength="200" placeholder="Ej: Hola {nombre_invitado}, ..." />
+        </div>
+
+        <div class="campo">
+          <label for="cuerpo-input">Cuerpo adicional *</label>
+          <textarea data-cy="cuerpo-input" id="cuerpo-input" maxlength="1000" rows="3" placeholder="Políticas, instrucciones, etc."></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="firma-input">Firma *</label>
+          <input data-cy="firma-input" id="firma-input" type="text" maxlength="300" placeholder="Dr. García — Medicina General" />
+        </div>
+
+        <div class="campo campo-checkbox">
+          <label>
+            <input data-cy="por-defecto-checkbox" id="por-defecto-checkbox" type="checkbox" />
+            Establecer como plantilla por defecto para este tipo
+          </label>
+        </div>
+
+        <div data-cy="error-campo-vacio" class="mensaje error oculto" role="alert">
+          Todos los campos marcados con * son obligatorios.
+        </div>
+        <div data-cy="error-nombre-duplicado" class="mensaje error oculto" role="alert">
+          Ya existe una plantilla con ese nombre. Usá un nombre diferente.
+        </div>
+        <div data-cy="plantilla-creada-confirmacion" class="mensaje exito oculto" role="status">
+          Plantilla creada correctamente.
+        </div>
+
+        <button data-cy="guardar-plantilla-btn" type="submit">Guardar plantilla</button>
+      </form>
+
+      <h3>Plantillas existentes</h3>
+      <ul data-cy="lista-plantillas" id="lista-plantillas"></ul>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- FLUJO OBLIGATORIO 2: Simular envío de notificación            -->
+    <!-- ============================================================ -->
+    <section id="vista-simular" class="vista oculto">
+      <h2>Simular envío de notificación</h2>
+      <p class="ayuda">Simula el envío de un email a un usuario invitado (M06-R01F / R05F).</p>
+
+      <form id="form-simular" novalidate>
+        <div class="campo">
+          <label for="tipo-notificacion-select">Tipo de notificación *</label>
+          <select data-cy="tipo-notificacion-select" id="tipo-notificacion-select">
+            <option value="confirmacion">Confirmación de reserva</option>
+            <option value="cancelacion">Cancelación de turno</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="email-destinatario-input">Email del invitado *</label>
+          <input data-cy="email-destinatario-input" id="email-destinatario-input" type="text" placeholder="usuario@dominio.com" />
+        </div>
+
+        <div class="campo campo-checkbox">
+          <label>
+            <input data-cy="simular-fallo-checkbox" id="simular-fallo-checkbox" type="checkbox" />
+            Simular fallo del servicio de correo
+          </label>
+        </div>
+
+        <div data-cy="error-email-invalido" class="mensaje error oculto" role="alert">
+          El email ingresado no es válido. Ej: usuario@dominio.com
+        </div>
+        <div data-cy="error-envio-fallido" class="mensaje error oculto" role="alert">
+          No se pudo enviar el email tras 3 reintentos. El error quedó registrado en el log.
+        </div>
+        <div data-cy="notificacion-enviada-confirmacion" class="mensaje exito oculto" role="status">
+          ¡Notificación enviada correctamente!
+        </div>
+
+        <button data-cy="enviar-notificacion-btn" type="submit">Enviar notificación</button>
+      </form>
+
+      <h3>Historial de esta sesión</h3>
+      <ul data-cy="historial-envios" id="historial-envios"></ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

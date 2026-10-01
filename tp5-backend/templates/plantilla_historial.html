@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block titulo %}Versiones{% endblock %}
+{% block contenido %}
+<h1>Historial de versiones: {{ p.nombre }}</h1>
+<div class="card"><strong>Versión activa</strong> · {{ p.asunto }}<br>
+<span class="muted">Última modificación: {{ (p.modificada_en or p.creada_en)|fh }} por {{ p.modificada_por or p.autor }}</span></div>
+<table class="tabla"><tr><th>Guardada</th><th>Autor</th><th>Asunto</th><th>Cuerpo</th><th></th></tr>
+{% for v in versiones %}<tr><td>{{ v.guardada_en|fh }}</td><td>{{ v.autor }}</td><td>{{ v.asunto }}</td><td>{{ v.cuerpo }}</td>
+<td><form method="post" action="{{ url_for('plantilla_restaurar', pid=p.id, vid=v.id) }}" onsubmit="return confirm('¿Restaurar esta versión?')"><button class="btn sec">Restaurar</button></form></td></tr>
+{% else %}<tr><td colspan="5" class="muted">Sin versiones anteriores.</td></tr>{% endfor %}</table>
+<p><a href="{{ url_for('plantillas') }}">← Volver a plantillas</a></p>
+{% endblock %}

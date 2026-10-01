@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block titulo %}Reserva confirmada{% endblock %}
+{% block contenido %}
+<div class="card">
+<p class="ok-grande">✔ ¡Reserva confirmada! Te enviamos un email de confirmación a {{ r.invitado_email }}</p>
+<p>{{ r.evento }} · {{ r.fecha_hora|fecha_larga }} a las {{ r.fecha_hora|hora }} hs</p>
+<p class="muted">Reserva #{{ r.id }}</p></div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block titulo %}Cancelar reserva{% endblock %}
+{% block contenido %}
+<h1>Cancelar reserva #{{ r.id }}</h1>
+<div class="card"><p><strong>{{ r.invitado_nombre }}</strong> ({{ r.invitado_email }}) · {{ r.evento }} ·
+{{ r.fecha_hora|fecha_corta }} {{ r.fecha_hora|hora }} hs · <span class="estado {{ r.estado }}">{{ r.estado }}</span></p>
+<form method="post">
+<label for="motivo">Motivo de cancelación (opcional)</label>
+<textarea id="motivo" name="motivo"></textarea>
+<label class="switch"><input type="checkbox" id="notificar" name="notificar" checked> Notificar al invitado por email</label>
+<p class="acciones"><button class="btn peligro" type="submit">Confirmar cancelación</button>
+<a class="btn sec" href="{{ url_for('panel') }}">Volver</a></p>
+</form></div>
+{% endblock %}

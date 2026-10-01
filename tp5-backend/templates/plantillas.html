@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block titulo %}Plantillas de Email{% endblock %}
+{% block contenido %}
+<div class="acciones" style="justify-content:space-between"><h1>Configuración → Plantillas de Email</h1>
+<a class="btn" href="{{ url_for('plantilla_nueva') }}">+ Nueva Plantilla</a></div>
+{% for tipo, filas in grupos %}
+<h2>{{ tipo }}</h2>
+<table class="tabla"><tr><th style="width:34%">Nombre</th><th>Asunto</th><th style="width:12%">Por defecto</th><th style="width:26%">Acciones</th></tr>
+{% for p in filas %}<tr><td>{{ p.nombre }}</td><td>{{ p.asunto }}</td>
+<td>{% if p.por_defecto %}<span class="estrella">★ Por defecto</span>{% endif %}</td>
+<td class="acciones"><a class="btn sec" href="{{ url_for('plantilla_editar', pid=p.id) }}">Editar</a>
+<a href="{{ url_for('plantilla_historial', pid=p.id) }}">Versiones</a>
+{% if filas|length == 1 %}
+<span class="tooltip-wrap"><button class="btn deshabilitado" disabled aria-label="{{ 'No podés eliminar la única plantilla de este tipo. Creá otra antes de eliminar esta.' }}">Eliminar</button>
+<span class="tip">No podés eliminar la única plantilla de este tipo. Creá otra antes de eliminar esta.</span></span>
+{% else %}
+<button class="btn peligro" type="button" onclick='abrirDialogo({{ p.id }}, {{ p.nombre|tojson }})'>Eliminar</button>
+{% endif %}</td></tr>
+{% else %}<tr><td colspan="4" class="muted">No hay plantillas de este tipo.</td></tr>{% endfor %}</table>
+{% endfor %}
+<dialog id="dlg"><p id="dlg-texto"></p>
+<form method="post" id="dlg-form" class="acciones"><button class="btn peligro" type="submit">Sí, eliminar</button>
+<button class="btn sec" type="button" onclick="document.getElementById('dlg').close()">Cancelar</button></form></dialog>
+{% endblock %}
+{% block scripts %}<script>
+function abrirDialogo(id, nombre){
+  document.getElementById('dlg-texto').textContent = '¿Estás seguro de que querés eliminar la plantilla "' + nombre + '"? Esta acción es irreversible y no se puede deshacer.';
+  document.getElementById('dlg-form').action = '/admin/plantillas/' + id + '/eliminar';
+  document.getElementById('dlg').showModal();
+}
+</script>{% endblock %}

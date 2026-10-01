@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block titulo %}Recordatorios{% endblock %}
+{% block contenido %}
+<h1>Cola de recordatorios programados</h1>
+<form method="post" class="acciones" style="margin-bottom:12px"><button class="btn" type="submit">Ejecutar job de recordatorios ahora</button>
+<span class="muted">El job también corre automáticamente con el reloj del entorno.</span></form>
+<table class="tabla"><tr><th>Reserva</th><th>Invitado</th><th>Turno</th><th>Estado de la reserva</th><th>Recordatorio</th><th>Enviado</th></tr>
+{% for r in filas %}<tr><td>#{{ r.id }}</td><td>{{ r.invitado_nombre }}</td><td>{{ r.fecha_hora|fecha_corta }} {{ r.fecha_hora|hora }}</td>
+<td><span class="estado {{ r.estado }}">{{ r.estado }}</span></td>
+<td><span class="estado {{ r.recordatorio_estado.split()[0] }}">{{ r.recordatorio_estado }}</span></td><td>{{ r.recordatorio_enviado_en|fh }}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">No hay reservas.</td></tr>{% endfor %}</table>
+{% endblock %}

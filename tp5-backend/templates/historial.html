@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block titulo %}Historial{% endblock %}
+{% block contenido %}
+<h1>Notificaciones · Historial (últimos 60 días)</h1>
+<form class="card acciones" method="get">
+<label style="margin:0">Tipo <select name="tipo">{% for t in tipos %}<option {{ 'selected' if t == tipo }}>{{ t }}</option>{% endfor %}</select></label>
+<label style="margin:0">Estado <select name="estado">{% for e in ['Todos','Enviado','Fallido'] %}<option {{ 'selected' if e == estado }}>{{ e }}</option>{% endfor %}</select></label>
+<button class="btn" type="submit">Filtrar</button></form>
+<table class="tabla"><tr><th>Tipo</th><th>Destinatario</th><th>Fecha y hora de envío</th><th>Estado</th></tr>
+{% for n in filas %}<tr><td>{{ n.tipo }}</td><td>{{ n.destinatario|enmascarar }}</td><td>{{ n.enviada_en|fh }}</td>
+<td><span class="estado {{ n.estado }}">{{ n.estado }}</span></td></tr>
+{% else %}<tr><td colspan="4" class="muted" id="sin-resultados">{{ vacio }}</td></tr>{% endfor %}</table>
+{% endblock %}

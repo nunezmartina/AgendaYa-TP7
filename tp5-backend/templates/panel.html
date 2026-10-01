@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% block titulo %}Panel{% endblock %}
+{% block contenido %}
+<h1>Panel de gestión de agenda</h1>
+<div class="dos-col">
+<div>
+<h2 style="margin-top:0">Reservas</h2>
+<table class="tabla"><tr><th>#</th><th>Invitado</th><th>Evento</th><th>Turno</th><th>Estado</th><th></th></tr>
+{% for r in reservas %}<tr><td>{{ r.id }}</td><td>{{ r.invitado_nombre }}</td><td>{{ r.evento }}</td>
+<td>{{ r.fecha_hora|fecha_corta }} {{ r.fecha_hora|hora }}</td><td><span class="estado {{ r.estado }}">{{ r.estado }}</span></td>
+<td class="acciones"><a href="{{ url_for('detalle_reserva', rid=r.id) }}">Ver</a>
+{% if r.estado == 'Confirmada' %}<a class="btn sec" href="{{ url_for('cancelar_reserva', rid=r.id) }}">Cancelar reserva</a>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">No hay reservas.</td></tr>{% endfor %}</table>
+</div>
+<div class="card" style="padding:0">
+<div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--borde)">
+<strong>Centro de notificaciones <span class="badge" id="badge-panel">{{ badge }}</span></strong>
+<form method="post" action="{{ url_for('marcar_leidas') }}"><button class="btn sec" style="padding:4px 10px;font-size:13px">Marcar todo como leído</button></form></div>
+<div id="alertas">{% include "_alertas.html" %}</div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script>
+// Actualización en tiempo real sin recargar (US-M06-002)
+setInterval(async () => {
+  const r = await fetch("{{ url_for('api_alertas') }}"); const d = await r.json();
+  document.getElementById("badge").textContent = d.badge;
+  document.getElementById("badge-panel").textContent = d.badge;
+  document.getElementById("alertas").innerHTML = d.html;
+}, 5000);
+</script>{% endblock %}

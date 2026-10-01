@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block titulo %}Turnos{% endblock %}
+{% block contenido %}
+<h1>{{ evento.nombre }}</h1>
+<p class="muted">Paso 2 de 3: elegí un turno disponible (horario ARG)</p>
+{% for dia, libres in agenda %}
+<div class="card"><h2 style="margin-top:0">{{ fecha_larga(dia)|capitalize }}</h2>
+{% if libres %}<div class="grid-turnos">{% for t in libres %}
+<a href="{{ url_for('reservar', evento_id=evento.id, fh=t.isoformat()) }}">{{ t.strftime('%H:%M') }}</a>{% endfor %}</div>
+{% else %}<span class="muted">Sin turnos disponibles.</span>{% endif %}</div>{% endfor %}
+{% endblock %}

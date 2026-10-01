@@ -1,0 +1,20 @@
+{
+  "name": "agendaya-tp6",
+  "version": "1.0.0",
+  "description": "AgendaYA - TP6 Testing Automatizado - Modulo M06 Notificaciones y Comunicaciones - Grupo 9",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "start": "npx live-server frontend --port=5500"
+  },
+  "keywords": ["agendaya", "testing", "cypress", "jest"],
+  "author": "Grupo 9 - Ingenieria de Software 4to Año 2026",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^13.13.0",
+    "jest": "^30.5.2"
+  }
+}

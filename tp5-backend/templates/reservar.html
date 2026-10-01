@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block titulo %}Reservar{% endblock %}
+{% block contenido %}
+<h1>Completá tus datos</h1>
+<div class="card"><strong>{{ evento.nombre }}</strong> con {{ admin.nombre }} ·
+{{ fh|fecha_larga }} a las {{ fh|hora }} hs · {{ evento.modalidad }} · {{ admin.direccion }}</div>
+{% if errores.turno %}<div class="flash error">{{ errores.turno }}</div>{% endif %}
+<form method="post" class="card" novalidate>
+<input type="hidden" name="fh" value="{{ fh }}">
+<label for="nombre">Nombre completo</label>
+<input type="text" id="nombre" name="nombre" value="{{ datos.nombre or '' }}">
+{% if errores.nombre %}<div class="error-inline">{{ errores.nombre }}</div>{% endif %}
+<label for="email">Email</label>
+<input type="email" id="email" name="email" value="{{ datos.email or '' }}" class="{{ 'invalido' if errores.email }}">
+{% if errores.email %}<div class="error-inline" id="error-email">{{ errores.email }}</div>{% endif %}
+<label for="telefono">Teléfono (opcional)</label>
+<input type="text" id="telefono" name="telefono" value="{{ datos.telefono or '' }}">
+<label for="nota">Nota para el profesional (opcional)</label>
+<textarea id="nota" name="nota">{{ datos.nota or '' }}</textarea>
+<p><button class="btn" type="submit">Confirmar reserva</button></p>
+</form>
+{% endblock %}

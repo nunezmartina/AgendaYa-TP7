@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block titulo %}Reserva #{{ r.id }}{% endblock %}
+{% block contenido %}
+<h1>Reserva #{{ r.id }}</h1>
+{% if r.aviso_panel %}<div class="flash">{{ r.aviso_panel }}</div>{% endif %}
+<div class="card"><table class="tabla">
+<tr><th>Invitado</th><td>{{ r.invitado_nombre }} · {{ r.invitado_email }} · {{ r.invitado_telefono or '—' }}</td></tr>
+<tr><th>Evento</th><td>{{ r.evento }} ({{ r.modalidad }})</td></tr>
+<tr><th>Turno</th><td>{{ r.fecha_hora|fecha_larga }} · {{ r.fecha_hora|hora }} hs</td></tr>
+<tr><th>Estado</th><td><span class="estado {{ r.estado }}">{{ r.estado }}</span>{% if r.cancelada_por %} (cancelada por {{ r.cancelada_por }}){% endif %}</td></tr>
+<tr><th>Motivo de cancelación</th><td>{{ r.motivo_cancelacion or '—' }}</td></tr>
+<tr><th>Recordatorio</th><td><span class="estado {{ r.recordatorio_estado.split()[0] }}">{{ r.recordatorio_estado }}</span> {{ r.recordatorio_enviado_en|fh }}</td></tr>
+<tr><th>Nota</th><td>{{ r.nota or '—' }}</td></tr></table>
+{% if r.estado == 'Confirmada' %}<p><a class="btn sec" href="{{ url_for('cancelar_reserva', rid=r.id) }}">Cancelar reserva</a></p>{% endif %}
+</div>
+{% endblock %}

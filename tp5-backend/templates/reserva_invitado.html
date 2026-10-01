@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block titulo %}Mi reserva{% endblock %}
+{% block contenido %}
+<h1>Mi reserva #{{ r.id }}</h1>
+<div class="card"><p><strong>{{ r.evento }}</strong> con {{ admin.nombre }}</p>
+<p>{{ r.fecha_hora|fecha_larga }} a las {{ r.fecha_hora|hora }} hs · {{ r.modalidad }} · {{ admin.direccion }}</p>
+<p>Estado: <span class="estado {{ r.estado }}">{{ r.estado }}</span></p>
+{% if r.estado == 'Confirmada' %}
+<form method="post"><label for="motivo">Motivo (opcional)</label><input type="text" id="motivo" name="motivo">
+<p><button class="btn peligro" type="submit">Cancelar mi reserva</button></p></form>{% endif %}
+</div>
+{% endblock %}
