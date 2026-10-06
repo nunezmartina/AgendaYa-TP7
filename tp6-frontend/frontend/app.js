@@ -76,7 +76,8 @@ formPlantilla.addEventListener('submit', (e) => {
   const esPorDefecto = calcularEsPorDefecto({ existeOtraPlantillaDelTipo, tickActivado });
 
   if (esPorDefecto) {
-    // Desplaza a la anterior por defecto del mismo tipo
+    // Desplaza solo a la anterior por defecto DEL MISMO TIPO (M06-R04F).
+    // INC-0612: no tocar las plantillas por defecto de otros tipos de notificación.
     plantillas.forEach((p) => {
       if (p.tipo === tipo) p.porDefecto = false;
     });
