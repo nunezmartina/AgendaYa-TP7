@@ -37,19 +37,24 @@ function generarAsunto(tipo, datos = {}) {
 
   switch (tipo) {
     case 'confirmacion':
-      if (!nombreProfesional) throw new Error('Falta nombreProfesional para el asunto de confirmación');
+      if (!nombreProfesional)
+        throw new Error('Falta nombreProfesional para el asunto de confirmación');
       return `Tu reserva con ${nombreProfesional} está confirmada`;
     case 'recordatorio':
-      if (!nombreProfesional) throw new Error('Falta nombreProfesional para el asunto de recordatorio');
+      if (!nombreProfesional)
+        throw new Error('Falta nombreProfesional para el asunto de recordatorio');
       return `Recordatorio: tu turno con ${nombreProfesional} es mañana`;
     case 'cancelacion':
-      if (!nombreProfesional) throw new Error('Falta nombreProfesional para el asunto de cancelación');
+      if (!nombreProfesional)
+        throw new Error('Falta nombreProfesional para el asunto de cancelación');
       return `Tu reserva con ${nombreProfesional} fue cancelada`;
     case 'nueva_reserva_admin':
-      if (!nombreInvitado || !fecha || !hora) throw new Error('Faltan datos para el asunto de nueva reserva');
+      if (!nombreInvitado || !fecha || !hora)
+        throw new Error('Faltan datos para el asunto de nueva reserva');
       return `Nueva reserva — ${nombreInvitado} — ${fecha} ${hora}`;
     case 'cancelacion_admin':
-      if (!nombreInvitado || !fecha || !hora) throw new Error('Faltan datos para el asunto de cancelación (admin)');
+      if (!nombreInvitado || !fecha || !hora)
+        throw new Error('Faltan datos para el asunto de cancelación (admin)');
       return `Cancelación — ${nombreInvitado} — ${fecha} ${hora}`;
     default:
       throw new Error('Tipo no soportado');
@@ -63,7 +68,11 @@ function generarAsunto(tipo, datos = {}) {
 //    Devuelve si la plantilla que se está guardando queda (o sigue) siendo
 //    la plantilla por defecto de su tipo.
 // ---------------------------------------------------------------------------
-function calcularEsPorDefecto({ existeOtraPlantillaDelTipo, tickActivado, yaEraPorDefecto = false }) {
+function calcularEsPorDefecto({
+  existeOtraPlantillaDelTipo,
+  tickActivado,
+  yaEraPorDefecto = false,
+}) {
   // Si no existe ninguna otra plantilla de ese tipo, la nueva siempre
   // queda como por defecto, sin importar el tick.
   if (!existeOtraPlantillaDelTipo) return true;
@@ -97,7 +106,11 @@ function construirCuerpoEmail(plantilla, variables = {}) {
   const variablesFaltantes = [];
 
   const cuerpo = plantilla.replace(/\{([a-zA-Z_]+)\}/g, (match, nombreVar) => {
-    if (Object.prototype.hasOwnProperty.call(variables, nombreVar) && variables[nombreVar] !== undefined && variables[nombreVar] !== '') {
+    if (
+      Object.prototype.hasOwnProperty.call(variables, nombreVar) &&
+      variables[nombreVar] !== undefined &&
+      variables[nombreVar] !== ''
+    ) {
       return String(variables[nombreVar]);
     }
     variablesFaltantes.push(nombreVar);

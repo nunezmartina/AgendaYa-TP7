@@ -1,4 +1,5 @@
 """Un test automatizado por cada caso de prueba del TP N°5 (Grupo 9)."""
+
 from conftest import login, fijar_reloj, bandeja, query
 
 TURNO = "2026-11-18T10:30:00"
@@ -6,9 +7,11 @@ RESERVAR = f"/agenda/dr-garcia/1/reservar?fh={TURNO}"
 
 
 def reservar(client, nombre, email, telefono="", nota="", fh=TURNO, evento=1):
-    return client.post(f"/agenda/dr-garcia/{evento}/reservar?fh={fh}",
-                       data={"nombre": nombre, "email": email, "telefono": telefono, "nota": nota},
-                       follow_redirects=True)
+    return client.post(
+        f"/agenda/dr-garcia/{evento}/reservar?fh={fh}",
+        data={"nombre": nombre, "email": email, "telefono": telefono, "nota": nota},
+        follow_redirects=True,
+    )
 
 
 # ---------------------------------------------------------------- M06-R01F
@@ -22,10 +25,18 @@ def test_CP_001_email_de_confirmacion_con_email_valido(preparar):
     assert envio["estado"] == "enviado" and envio["plantilla_nombre"] == "Confirmación formal"
     assert envio["asunto"] == "Tu reserva con Dr. García está confirmada"
     from datetime import datetime
+
     demora = datetime.fromisoformat(envio["enviada_en"]) - datetime.fromisoformat(reserva["creada_en"])
     assert demora.total_seconds() < 30  # M06-R01NF
-    for dato in ("Consulta inicial - 30 min", "miércoles 18 de noviembre de 2026", "10:30",
-                 "Presencial", "Av. San Martín 420, Mendoza", "261-555-0001", "Ver detalles de mi reserva"):
+    for dato in (
+        "Consulta inicial - 30 min",
+        "miércoles 18 de noviembre de 2026",
+        "10:30",
+        "Presencial",
+        "Av. San Martín 420, Mendoza",
+        "261-555-0001",
+        "Ver detalles de mi reserva",
+    ):
         assert dato in envio["cuerpo_html"]
 
 
@@ -41,15 +52,21 @@ def test_CP_002_email_con_formato_invalido(preparar):
 # ---------------------------------------------------------------- M06-R02F
 def test_CP_003_notificacion_al_admin_por_nueva_reserva(preparar):
     c = preparar("CP-003")
-    reservar(c, "María Gómez", "maria@email.com", "261-555-9999",
-             "Primera consulta, vengo derivada del Dr. López")
+    reservar(c, "María Gómez", "maria@email.com", "261-555-9999", "Primera consulta, vengo derivada del Dr. López")
     login(c)
     assert c.get("/admin/api/alertas").get_json()["badge"] == 1
     html = bandeja(c, "admin@agendaya.com")
     assert "Nueva reserva — María Gómez — 18/11/2026 10:30 hs" in html
     cuerpo = query("SELECT cuerpo_html FROM notificacion WHERE destinatario='admin@agendaya.com'")[0][0]
-    for dato in ("María Gómez", "maria@email.com", "261-555-9999", "Consulta inicial - 30 min",
-                 "18/11/2026", "10:30", "Primera consulta, vengo derivada del Dr. López"):
+    for dato in (
+        "María Gómez",
+        "maria@email.com",
+        "261-555-9999",
+        "Consulta inicial - 30 min",
+        "18/11/2026",
+        "10:30",
+        "Primera consulta, vengo derivada del Dr. López",
+    ):
         assert dato in cuerpo
 
 
@@ -75,8 +92,14 @@ def test_CP_005_recordatorio_24_horas_antes(preparar):
     envio = query("SELECT * FROM notificacion WHERE tipo='Recordatorio'")[0]
     assert envio["asunto"] == "Recordatorio: tu turno con Dr. García es mañana"
     assert envio["plantilla_nombre"] == "Recordatorio estándar"
-    for dato in ("Consulta inicial - 30 min", "miércoles 18 de noviembre de 2026", "10:30 hs (ARG)",
-                 "Presencial", "Av. San Martín 420, Mendoza", "261-555-0001"):
+    for dato in (
+        "Consulta inicial - 30 min",
+        "miércoles 18 de noviembre de 2026",
+        "10:30 hs (ARG)",
+        "Presencial",
+        "Av. San Martín 420, Mendoza",
+        "261-555-0001",
+    ):
         assert dato in envio["cuerpo_html"]
 
 
@@ -95,12 +118,18 @@ def test_CP_006_no_se_programa_recordatorio_de_ultimo_momento(preparar):
 def test_CP_007_primera_plantilla_del_tipo_queda_por_defecto(preparar):
     c = preparar("CP-007")
     login(c)
-    r = c.post("/admin/plantillas/nueva", follow_redirects=True, data={
-        "nombre": "Recordatorio verano", "tipo": "Recordatorio al invitado",
-        "asunto": "Tu turno con {nombre_profesional} es mañana",
-        "saludo": "Hola {nombre_invitado}, te recordamos tu turno de mañana.",
-        "cuerpo": "Por favor llegá 5 minutos antes. Ante cualquier consulta llamá al 261-555-0001.",
-        "firma": "Dr. García - Medicina General - Tel 261-555-0001"})  # tick NO activado
+    r = c.post(
+        "/admin/plantillas/nueva",
+        follow_redirects=True,
+        data={
+            "nombre": "Recordatorio verano",
+            "tipo": "Recordatorio al invitado",
+            "asunto": "Tu turno con {nombre_profesional} es mañana",
+            "saludo": "Hola {nombre_invitado}, te recordamos tu turno de mañana.",
+            "cuerpo": "Por favor llegá 5 minutos antes. Ante cualquier consulta llamá al 261-555-0001.",
+            "firma": "Dr. García - Medicina General - Tel 261-555-0001",
+        },
+    )  # tick NO activado
     assert "Plantilla creada correctamente" in r.get_data(as_text=True)
     p = query("SELECT * FROM plantilla WHERE nombre='Recordatorio verano'")[0]
     assert p["por_defecto"] == 1 and p["autor"] == "admin@agendaya.com" and p["creada_en"]
@@ -109,10 +138,17 @@ def test_CP_007_primera_plantilla_del_tipo_queda_por_defecto(preparar):
 def test_CP_008_nombre_duplicado(preparar):
     c = preparar("CP-008")
     login(c)
-    html = c.post("/admin/plantillas/nueva", data={
-        "nombre": "Confirmación formal", "tipo": "Confirmación al invitado",
-        "asunto": "Tu reserva con {nombre_profesional} está confirmada", "saludo": "Hola {nombre_invitado}",
-        "cuerpo": "Te esperamos.", "firma": "Dr. García"}).get_data(as_text=True)
+    html = c.post(
+        "/admin/plantillas/nueva",
+        data={
+            "nombre": "Confirmación formal",
+            "tipo": "Confirmación al invitado",
+            "asunto": "Tu reserva con {nombre_profesional} está confirmada",
+            "saludo": "Hola {nombre_invitado}",
+            "cuerpo": "Te esperamos.",
+            "firma": "Dr. García",
+        },
+    ).get_data(as_text=True)
     assert "Ya existe una plantilla con ese nombre. Por favor usá un nombre diferente" in html
     assert query("SELECT COUNT(*) FROM plantilla WHERE nombre='Confirmación formal'")[0][0] == 1
 
@@ -125,11 +161,19 @@ def test_CP_009_edicion_conserva_por_defecto(preparar):
     c = preparar("CP-009")
     login(c)
     pid = _pid("Confirmación formal")
-    r = c.post(f"/admin/plantillas/{pid}/editar", follow_redirects=True, data={
-        "nombre": "Confirmación formal", "asunto": "¡Listo! Tu reserva con {nombre_profesional} está confirmada",
-        "saludo": "Hola {nombre_invitado},",
-        "cuerpo": "Por favor llegá 5 minutos antes. Ante cualquier consulta llamá al 261-555-0001. ¡Te esperamos!",
-        "firma": "Dr. García - Medicina General - Tel 261-555-0001", "por_defecto": "on", "accion": "guardar"})
+    r = c.post(
+        f"/admin/plantillas/{pid}/editar",
+        follow_redirects=True,
+        data={
+            "nombre": "Confirmación formal",
+            "asunto": "¡Listo! Tu reserva con {nombre_profesional} está confirmada",
+            "saludo": "Hola {nombre_invitado},",
+            "cuerpo": "Por favor llegá 5 minutos antes. Ante cualquier consulta llamá al 261-555-0001. ¡Te esperamos!",
+            "firma": "Dr. García - Medicina General - Tel 261-555-0001",
+            "por_defecto": "on",
+            "accion": "guardar",
+        },
+    )
     assert "Plantilla actualizada correctamente" in r.get_data(as_text=True)
     p = query("SELECT * FROM plantilla WHERE id=?", pid)[0]
     assert p["por_defecto"] == 1 and p["asunto"].startswith("¡Listo!") and p["modificada_por"]
@@ -142,11 +186,21 @@ def test_CP_010_no_se_puede_quitar_tick_a_la_unica(preparar):
     login(c)
     pid = _pid("Cancelación con motivo")
     antes = dict(query("SELECT * FROM plantilla WHERE id=?", pid)[0])
-    html = c.post(f"/admin/plantillas/{pid}/editar", data={
-        "nombre": antes["nombre"], "asunto": antes["asunto"], "saludo": antes["saludo"],
-        "cuerpo": antes["cuerpo"], "firma": antes["firma"], "accion": "guardar"}).get_data(as_text=True)
-    assert ("No podés quitar el estado por defecto si es la única plantilla de este tipo. "
-            "Creá otra y marcala como por defecto primero.") in html
+    html = c.post(
+        f"/admin/plantillas/{pid}/editar",
+        data={
+            "nombre": antes["nombre"],
+            "asunto": antes["asunto"],
+            "saludo": antes["saludo"],
+            "cuerpo": antes["cuerpo"],
+            "firma": antes["firma"],
+            "accion": "guardar",
+        },
+    ).get_data(as_text=True)
+    assert (
+        "No podés quitar el estado por defecto si es la única plantilla de este tipo. "
+        "Creá otra y marcala como por defecto primero."
+    ) in html
     assert dict(query("SELECT * FROM plantilla WHERE id=?", pid)[0]) == antes
 
 
@@ -174,15 +228,22 @@ def test_CP_012_no_se_puede_eliminar_la_unica(preparar):
 def test_CP_013_cancelacion_con_motivo_envia_email(preparar):
     c = preparar("CP-013")
     login(c)
-    r = c.post("/admin/reservas/1042/cancelar", follow_redirects=True,
-               data={"motivo": "Surgió un imprevisto. Disculpá las molestias.", "notificar": "on"})
+    r = c.post(
+        "/admin/reservas/1042/cancelar",
+        follow_redirects=True,
+        data={"motivo": "Surgió un imprevisto. Disculpá las molestias.", "notificar": "on"},
+    )
     assert "Email de cancelación enviado a maria@email.com" in r.get_data(as_text=True)
     reserva = query("SELECT * FROM reserva WHERE id=1042")[0]
     assert reserva["estado"] == "Cancelada" and reserva["recordatorio_estado"] == "cancelado"
     envio = query("SELECT * FROM notificacion WHERE tipo='Cancelación'")[0]
     assert envio["asunto"] == "Tu turno con Dr. García fue cancelado"
-    for dato in ("<s>Consulta inicial - 30 min</s>", "miércoles 18 de noviembre de 2026",
-                 "Surgió un imprevisto. Disculpá las molestias.", "Reservar nuevo turno"):
+    for dato in (
+        "<s>Consulta inicial - 30 min</s>",
+        "miércoles 18 de noviembre de 2026",
+        "Surgió un imprevisto. Disculpá las molestias.",
+        "Reservar nuevo turno",
+    ):
         assert dato in envio["cuerpo_html"]
     assert "10:30" in c.get("/agenda/dr-garcia/1").get_data(as_text=True)  # horario liberado
 
