@@ -1,1 +1,1 @@
-// Archivo de soporte de Cypress 
+// Archivo de soporte de Cypress

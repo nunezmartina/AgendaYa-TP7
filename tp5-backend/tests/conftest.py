@@ -14,10 +14,12 @@ import escenarios  # noqa: E402
 @pytest.fixture
 def preparar():
     """Prepara el entorno de un CP y devuelve un cliente HTTP."""
+
     def _preparar(cp):
         with flask_app.app_context():
             escenarios.ESCENARIOS[cp][1]()
         return flask_app.test_client()
+
     return _preparar
 
 
@@ -35,6 +37,7 @@ def bandeja(client, email):
 
 def query(sql, *params):
     import sqlite3
+
     db = sqlite3.connect(os.environ["AGENDAYA_DB"])
     db.row_factory = sqlite3.Row
     filas = db.execute(sql, params).fetchall()

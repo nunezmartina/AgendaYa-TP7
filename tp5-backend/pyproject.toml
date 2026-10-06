@@ -1,0 +1,11 @@
+# Configuración de Ruff: linter y formateador de Python (TP7 - pipeline)
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/W: estilo PEP 8 · F: errores reales (Pyflakes) · B: bugs probables (bugbear)
+select = ["E", "W", "F", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

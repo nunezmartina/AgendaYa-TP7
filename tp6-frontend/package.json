@@ -4,17 +4,37 @@
   "description": "AgendaYA - TP6 Testing Automatizado - Modulo M06 Notificaciones y Comunicaciones - Grupo 9",
   "main": "index.js",
   "scripts": {
+    "start": "http-server dist -p 5500 -c-1 -s",
     "test": "jest",
     "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build": "node scripts/build.js",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "start": "npx live-server frontend --port=5500"
+    "start:dev": "http-server frontend -p 5500 -c-1"
   },
-  "keywords": ["agendaya", "testing", "cypress", "jest"],
+  "keywords": [
+    "agendaya",
+    "testing",
+    "cypress",
+    "jest"
+  ],
   "author": "Grupo 9 - Ingenieria de Software 4to Año 2026",
   "license": "ISC",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "cypress": "^13.13.0",
-    "jest": "^30.5.2"
+    "eslint": "^10.12.0",
+    "eslint-plugin-cypress": "^7.0.2",
+    "globals": "^17.13.0",
+    "http-server": "^14.1.1",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
+    "prettier": "^3.9.9"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
