@@ -37,13 +37,15 @@ describe('Nuñez Martina — esEmailValido y generarAsunto', () => {
   });
 
   test('[generarAsunto] caso normal: asunto de confirmación sigue el patrón exacto', () => {
-    expect(generarAsunto('confirmacion', { nombreProfesional: 'Dr. García' }))
-      .toBe('Tu reserva con Dr. García está confirmada');
+    expect(generarAsunto('confirmacion', { nombreProfesional: 'Dr. García' })).toBe(
+      'Tu reserva con Dr. García está confirmada',
+    );
   });
 
   test('[generarAsunto] caso normal: asunto de recordatorio sigue el patrón exacto', () => {
-    expect(generarAsunto('recordatorio', { nombreProfesional: 'Dr. García' }))
-      .toBe('Recordatorio: tu turno con Dr. García es mañana');
+    expect(generarAsunto('recordatorio', { nombreProfesional: 'Dr. García' })).toBe(
+      'Recordatorio: tu turno con Dr. García es mañana',
+    );
   });
 });
 // ============================================================================
@@ -52,15 +54,21 @@ describe('Nuñez Martina — esEmailValido y generarAsunto', () => {
 // ============================================================================
 describe('Aguiar Josefina — calcularEsPorDefecto y puedeQuitarPorDefecto', () => {
   test('[calcularEsPorDefecto] caso normal: primera plantilla del tipo queda por defecto aunque el tick esté apagado', () => {
-    expect(calcularEsPorDefecto({ existeOtraPlantillaDelTipo: false, tickActivado: false })).toBe(true);
+    expect(calcularEsPorDefecto({ existeOtraPlantillaDelTipo: false, tickActivado: false })).toBe(
+      true,
+    );
   });
 
   test('[calcularEsPorDefecto] caso normal: nueva plantilla con tick activado desplaza a la anterior', () => {
-    expect(calcularEsPorDefecto({ existeOtraPlantillaDelTipo: true, tickActivado: true })).toBe(true);
+    expect(calcularEsPorDefecto({ existeOtraPlantillaDelTipo: true, tickActivado: true })).toBe(
+      true,
+    );
   });
 
   test('[calcularEsPorDefecto] caso normal: nueva plantilla sin tick activado queda como alternativa', () => {
-    expect(calcularEsPorDefecto({ existeOtraPlantillaDelTipo: true, tickActivado: false })).toBe(false);
+    expect(calcularEsPorDefecto({ existeOtraPlantillaDelTipo: true, tickActivado: false })).toBe(
+      false,
+    );
   });
 
   test('[puedeQuitarPorDefecto] caso de error: no se puede quitar el tick si es la única plantilla del tipo', () => {
@@ -79,7 +87,11 @@ describe('Aguiar Josefina — calcularEsPorDefecto y puedeQuitarPorDefecto', () 
 describe('Tejada Rocío — validarCamposPlantilla y calcularEsPorDefecto', () => {
   test('[validarCamposPlantilla] caso borde: un campo con solo espacios en blanco cuenta como vacío', () => {
     const resultado = validarCamposPlantilla({
-      nombre: 'Plantilla X', asunto: 'Asunto', saludo: '   ', cuerpo: 'Cuerpo', firma: 'Firma',
+      nombre: 'Plantilla X',
+      asunto: 'Asunto',
+      saludo: '   ',
+      cuerpo: 'Cuerpo',
+      firma: 'Firma',
     });
     expect(resultado.valido).toBe(false);
     expect(resultado.camposFaltantes).toEqual(['saludo']);
@@ -93,7 +105,11 @@ describe('Tejada Rocío — validarCamposPlantilla y calcularEsPorDefecto', () =
 
   test('[validarCamposPlantilla] caso normal: no marca como faltante un campo con contenido real', () => {
     const resultado = validarCamposPlantilla({
-      nombre: 'X', asunto: 'Y', saludo: 'Z', cuerpo: 'Contenido válido', firma: 'F',
+      nombre: 'X',
+      asunto: 'Y',
+      saludo: 'Z',
+      cuerpo: 'Contenido válido',
+      firma: 'F',
     });
     expect(resultado.camposFaltantes).not.toContain('cuerpo');
   });
@@ -102,14 +118,18 @@ describe('Tejada Rocío — validarCamposPlantilla y calcularEsPorDefecto', () =
     // Nota: el bloqueo real de "no permitir quitar el tick" se valida aparte
     // con puedeQuitarPorDefecto; esta función solo calcula el resultado pedido.
     const resultado = calcularEsPorDefecto({
-      existeOtraPlantillaDelTipo: true, tickActivado: false, yaEraPorDefecto: true,
+      existeOtraPlantillaDelTipo: true,
+      tickActivado: false,
+      yaEraPorDefecto: true,
     });
     expect(resultado).toBe(false);
   });
 
   test('[calcularEsPorDefecto] caso borde: primera plantilla del tipo con tick ya activado también da por defecto', () => {
     const resultado = calcularEsPorDefecto({
-      existeOtraPlantillaDelTipo: false, tickActivado: true, yaEraPorDefecto: false,
+      existeOtraPlantillaDelTipo: false,
+      tickActivado: true,
+      yaEraPorDefecto: false,
     });
     expect(resultado).toBe(true);
   });
@@ -121,15 +141,23 @@ describe('Tejada Rocío — validarCamposPlantilla y calcularEsPorDefecto', () =
 // ============================================================================
 describe('Perez Juliana — generarAsunto y validarCamposPlantilla', () => {
   test('[generarAsunto] caso normal: asunto de notificación al admin por nueva reserva', () => {
-    expect(generarAsunto('nueva_reserva_admin', {
-      nombreInvitado: 'María Gómez', fecha: '14/05', hora: '10:30',
-    })).toBe('Nueva reserva — María Gómez — 14/05 10:30');
+    expect(
+      generarAsunto('nueva_reserva_admin', {
+        nombreInvitado: 'María Gómez',
+        fecha: '14/05',
+        hora: '10:30',
+      }),
+    ).toBe('Nueva reserva — María Gómez — 14/05 10:30');
   });
 
   test('[generarAsunto] caso normal: asunto de cancelación al admin', () => {
-    expect(generarAsunto('cancelacion_admin', {
-      nombreInvitado: 'Juan Pérez', fecha: '12/05', hora: '15:00',
-    })).toBe('Cancelación — Juan Pérez — 12/05 15:00');
+    expect(
+      generarAsunto('cancelacion_admin', {
+        nombreInvitado: 'Juan Pérez',
+        fecha: '12/05',
+        hora: '15:00',
+      }),
+    ).toBe('Cancelación — Juan Pérez — 12/05 15:00');
   });
 
   test('[generarAsunto] caso de error: tipo de notificación inexistente lanza excepción', () => {
@@ -138,15 +166,27 @@ describe('Perez Juliana — generarAsunto y validarCamposPlantilla', () => {
 
   test('[validarCamposPlantilla] caso normal: todos los campos completos es válido', () => {
     const resultado = validarCamposPlantilla({
-      nombre: 'Confirmación formal', asunto: 'Asunto', saludo: 'Hola', cuerpo: 'Cuerpo', firma: 'Firma',
+      nombre: 'Confirmación formal',
+      asunto: 'Asunto',
+      saludo: 'Hola',
+      cuerpo: 'Cuerpo',
+      firma: 'Firma',
     });
     expect(resultado).toEqual({ valido: true, camposFaltantes: [] });
   });
 
   test('[validarCamposPlantilla] caso de error: detecta varios campos faltantes a la vez', () => {
-    const resultado = validarCamposPlantilla({ nombre: 'Recordatorio', asunto: '', saludo: undefined, cuerpo: 'Texto', firma: '' });
+    const resultado = validarCamposPlantilla({
+      nombre: 'Recordatorio',
+      asunto: '',
+      saludo: undefined,
+      cuerpo: 'Texto',
+      firma: '',
+    });
     expect(resultado.valido).toBe(false);
-    expect(resultado.camposFaltantes).toEqual(expect.arrayContaining(['asunto', 'saludo', 'firma']));
+    expect(resultado.camposFaltantes).toEqual(
+      expect.arrayContaining(['asunto', 'saludo', 'firma']),
+    );
   });
 });
 
@@ -223,7 +263,6 @@ describe('Bataller Paulina — construirCuerpoEmail y enmascararEmail', () => {
   });
 });
 
-
 // ============================================================================
 // Responsable: Lee Maria Luz
 // Funciones: esElegibleParaRecordatorio (3 tests) + puedeEliminarPlantilla (2 tests)
@@ -276,7 +315,9 @@ describe('Sanchez Ignacio — enmascararEmail y esElegibleParaRecordatorio', () 
   });
 
   test('[esElegibleParaRecordatorio] caso de error: fecha inválida lanza excepción', () => {
-    expect(() => esElegibleParaRecordatorio('fecha-invalida', new Date())).toThrow('Fecha inválida');
+    expect(() => esElegibleParaRecordatorio('fecha-invalida', new Date())).toThrow(
+      'Fecha inválida',
+    );
   });
 
   test('[esElegibleParaRecordatorio] caso borde: turno en el pasado respecto de la reserva no es elegible', () => {

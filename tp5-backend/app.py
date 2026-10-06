@@ -9,14 +9,14 @@ historial de envíos (/admin/historial), igual que Mailtrap.
 El reloj del sistema se puede simular desde /entorno para probar
 los recordatorios de 24 horas.
 """
+
 import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
 from functools import wraps
 
-from flask import (Flask, g, redirect, render_template, request, session,
-                   url_for, flash, jsonify, abort)
+from flask import Flask, g, redirect, render_template, request, session, url_for, flash, jsonify, abort
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get("AGENDAYA_DB", os.path.join(BASE_DIR, "agendaya.db"))
@@ -44,15 +44,31 @@ MAX_VERSIONES = 5
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$")
 MSG_EMAIL_INVALIDO = "El email ingresado no es válido. Ej: usuario@dominio.com"
 MSG_NOMBRE_DUPLICADO = "Ya existe una plantilla con ese nombre. Por favor usá un nombre diferente"
-MSG_TICK_UNICA = ("No podés quitar el estado por defecto si es la única plantilla de este tipo. "
-                  "Creá otra y marcala como por defecto primero.")
+MSG_TICK_UNICA = (
+    "No podés quitar el estado por defecto si es la única plantilla de este tipo. "
+    "Creá otra y marcala como por defecto primero."
+)
 MSG_ELIMINAR_UNICA = "No podés eliminar la única plantilla de este tipo. Creá otra antes de eliminar esta."
-MSG_ELIMINAR_DEFECTO = ("Esta plantilla es la por defecto. Primero designar otra como por defecto "
-                        "desde Editar, y luego podrás eliminar esta.")
+MSG_ELIMINAR_DEFECTO = (
+    "Esta plantilla es la por defecto. Primero designar otra como por defecto "
+    "desde Editar, y luego podrás eliminar esta."
+)
 
 DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
-MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
-         "septiembre", "octubre", "noviembre", "diciembre"]
+MESES = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -100,8 +116,7 @@ def close_db(_exc):
         db.close()
 
 
-TABLAS = ["config", "admin", "tipo_evento", "reserva", "plantilla", "plantilla_version",
-          "notificacion", "alerta"]
+TABLAS = ["config", "admin", "tipo_evento", "reserva", "plantilla", "plantilla_version", "notificacion", "alerta"]
 
 
 def reiniciar_db():
@@ -163,17 +178,22 @@ def admin_actual():
 
 
 def reserva_completa(rid):
-    return get_db().execute(
-        "SELECT r.*, t.nombre AS evento, t.modalidad FROM reserva r "
-        "JOIN tipo_evento t ON t.id=r.tipo_evento_id WHERE r.id=?", (rid,)).fetchone()
+    return (
+        get_db()
+        .execute(
+            "SELECT r.*, t.nombre AS evento, t.modalidad FROM reserva r "
+            "JOIN tipo_evento t ON t.id=r.tipo_evento_id WHERE r.id=?",
+            (rid,),
+        )
+        .fetchone()
+    )
 
 
 # ---------------------------------------------------------------------------
 # Envío de emails (M06-R01F, R02F, R03F, R05F)
 # ---------------------------------------------------------------------------
 def plantilla_por_defecto(tipo):
-    return get_db().execute(
-        "SELECT * FROM plantilla WHERE tipo=? AND por_defecto=1", (tipo,)).fetchone()
+    return get_db().execute("SELECT * FROM plantilla WHERE tipo=? AND por_defecto=1", (tipo,)).fetchone()
 
 
 def variables(reserva, admin):
@@ -203,22 +223,25 @@ def registrar_envio(tipo, destinatario, asunto, cuerpo_html, plantilla_nombre, r
     get_db().execute(
         "INSERT INTO notificacion (tipo, destinatario, asunto, cuerpo_html, plantilla_nombre, "
         "reserva_id, estado, intentos, enviada_en) VALUES (?,?,?,?,?,?,?,?,?)",
-        (tipo, destinatario, asunto, cuerpo_html, plantilla_nombre, reserva_id, estado,
-         intentos, ahora().isoformat()))
+        (tipo, destinatario, asunto, cuerpo_html, plantilla_nombre, reserva_id, estado, intentos, ahora().isoformat()),
+    )
     return estado
 
 
 def detalle_turno_html(reserva, admin, tachado=False):
     dt = datetime.fromisoformat(reserva["fecha_hora"])
     evento = f"<s>{reserva['evento']}</s>" if tachado else reserva["evento"]
-    filas = [("Tipo de evento", evento), ("Fecha", fecha_larga(dt)),
-             ("Hora", dt.strftime("%H:%M") + " hs (ARG)"), ("Profesional", admin["nombre"]),
-             ("Modalidad", reserva["modalidad"])]
+    filas = [
+        ("Tipo de evento", evento),
+        ("Fecha", fecha_larga(dt)),
+        ("Hora", dt.strftime("%H:%M") + " hs (ARG)"),
+        ("Profesional", admin["nombre"]),
+        ("Modalidad", reserva["modalidad"]),
+    ]
     if reserva["modalidad"] == "Presencial":
         filas.append(("Dirección", admin["direccion"]))
     filas.append(("Contacto del profesional", admin["telefono"]))
-    return "<table class='mail-det'>" + "".join(
-        f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in filas) + "</table>"
+    return "<table class='mail-det'>" + "".join(f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in filas) + "</table>"
 
 
 def email_desde_plantilla(tipo_plantilla, tipo_notif, reserva, extra_html=""):
@@ -228,15 +251,16 @@ def email_desde_plantilla(tipo_plantilla, tipo_notif, reserva, extra_html=""):
         return None
     v = variables(reserva, admin)
     asunto = completar(plantilla["asunto"], v)
-    cuerpo = (f"<p>{completar(plantilla['saludo'], v)}</p><p>{completar(plantilla['cuerpo'], v)}</p>"
-              f"{detalle_turno_html(reserva, admin, tachado=(tipo_notif == 'Cancelación'))}"
-              f"{extra_html}<p class='firma'>{completar(plantilla['firma'], v)}</p>")
-    return registrar_envio(tipo_notif, reserva["invitado_email"], asunto, cuerpo,
-                           plantilla["nombre"], reserva["id"])
+    cuerpo = (
+        f"<p>{completar(plantilla['saludo'], v)}</p><p>{completar(plantilla['cuerpo'], v)}</p>"
+        f"{detalle_turno_html(reserva, admin, tachado=(tipo_notif == 'Cancelación'))}"
+        f"{extra_html}<p class='firma'>{completar(plantilla['firma'], v)}</p>"
+    )
+    return registrar_envio(tipo_notif, reserva["invitado_email"], asunto, cuerpo, plantilla["nombre"], reserva["id"])
 
 
 def enviar_confirmacion(reserva):
-    boton = (f"<p><a class='btn' href='/reserva/{reserva['id']}'>Ver detalles de mi reserva</a></p>")
+    boton = f"<p><a class='btn' href='/reserva/{reserva['id']}'>Ver detalles de mi reserva</a></p>"
     return email_desde_plantilla("Confirmación al invitado", "Confirmación", reserva, boton)
 
 
@@ -249,8 +273,7 @@ def enviar_cancelacion(reserva):
     if reserva["motivo_cancelacion"]:
         motivo = f"<p><strong>Motivo:</strong> {reserva['motivo_cancelacion']}</p>"
     else:
-        motivo = (f"<p>Para más información, comunicate con {admin['nombre']} al "
-                  f"{admin['telefono']}.</p>")
+        motivo = f"<p>Para más información, comunicate con {admin['nombre']} al {admin['telefono']}.</p>"
     boton = "<p><a class='btn' href='/agenda/dr-garcia'>Reservar nuevo turno</a></p>"
     return email_desde_plantilla("Cancelación al invitado", "Cancelación", reserva, motivo + boton)
 
@@ -264,24 +287,34 @@ def notificar_admin(tipo, reserva):
         plantilla = plantilla_por_defecto("Nueva reserva al admin")
         asunto = f"Nueva reserva — {reserva['invitado_nombre']} — {cuando}"
         nombre_plantilla = plantilla["nombre"] if plantilla else None
-        filas = [("Invitado", reserva["invitado_nombre"]), ("Email", reserva["invitado_email"]),
-                 ("Teléfono", reserva["invitado_telefono"] or "—"), ("Tipo de evento", reserva["evento"]),
-                 ("Fecha", fecha_corta(dt)), ("Hora", dt.strftime("%H:%M") + " hs"),
-                 ("Nota del invitado", reserva["nota"] or "—")]
+        filas = [
+            ("Invitado", reserva["invitado_nombre"]),
+            ("Email", reserva["invitado_email"]),
+            ("Teléfono", reserva["invitado_telefono"] or "—"),
+            ("Tipo de evento", reserva["evento"]),
+            ("Fecha", fecha_corta(dt)),
+            ("Hora", dt.strftime("%H:%M") + " hs"),
+            ("Nota del invitado", reserva["nota"] or "—"),
+        ]
         texto_alerta = f"Nueva reserva de {reserva['invitado_nombre']} — {cuando}"
         tipo_alerta = "Nueva reserva"
     else:
         asunto = f"Cancelación — {reserva['invitado_nombre']} — {cuando}"
         nombre_plantilla = None
-        filas = [("Invitado", reserva["invitado_nombre"]), ("Turno cancelado", f"{reserva['evento']} — {cuando}"),
-                 ("Motivo", reserva["motivo_cancelacion"] or "—"), ("Horario", "Liberado")]
+        filas = [
+            ("Invitado", reserva["invitado_nombre"]),
+            ("Turno cancelado", f"{reserva['evento']} — {cuando}"),
+            ("Motivo", reserva["motivo_cancelacion"] or "—"),
+            ("Horario", "Liberado"),
+        ]
         texto_alerta = f"Cancelación de {reserva['invitado_nombre']} — {cuando}"
         tipo_alerta = "Cancelación"
-    cuerpo = "<table class='mail-det'>" + "".join(
-        f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in filas) + "</table>"
+    cuerpo = "<table class='mail-det'>" + "".join(f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in filas) + "</table>"
     registrar_envio("Aviso al admin", admin["email"], asunto, cuerpo, nombre_plantilla, reserva["id"])
-    get_db().execute("INSERT INTO alerta (tipo, texto, creada_en, leida) VALUES (?,?,?,0)",
-                     (tipo_alerta, texto_alerta, ahora().isoformat()))
+    get_db().execute(
+        "INSERT INTO alerta (tipo, texto, creada_en, leida) VALUES (?,?,?,0)",
+        (tipo_alerta, texto_alerta, ahora().isoformat()),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -291,7 +324,8 @@ def ejecutar_job_recordatorios():
     db = get_db()
     momento = ahora()
     pendientes = db.execute(
-        "SELECT id FROM reserva WHERE estado='Confirmada' AND recordatorio_estado='programado'").fetchall()
+        "SELECT id FROM reserva WHERE estado='Confirmada' AND recordatorio_estado='programado'"
+    ).fetchall()
     enviados = 0
     for row in pendientes:
         r = reserva_completa(row["id"])
@@ -300,8 +334,10 @@ def ejecutar_job_recordatorios():
         # Tolerancia de ±5 minutos (criterio SMART de US-M06-003)
         if timedelta(0) < falta <= timedelta(hours=24, minutes=5):
             estado = enviar_recordatorio(r)
-            db.execute("UPDATE reserva SET recordatorio_estado=?, recordatorio_enviado_en=? WHERE id=?",
-                       ("enviado" if estado == "enviado" else "fallido", momento.isoformat(), r["id"]))
+            db.execute(
+                "UPDATE reserva SET recordatorio_estado=?, recordatorio_enviado_en=? WHERE id=?",
+                ("enviado" if estado == "enviado" else "fallido", momento.isoformat(), r["id"]),
+            )
             enviados += 1
     return enviados
 
@@ -325,6 +361,7 @@ def login_requerido(f):
         if not session.get("admin"):
             return redirect(url_for("login", siguiente=request.path))
         return f(*a, **kw)
+
     return envoltura
 
 
@@ -368,8 +405,7 @@ DIAS_AGENDA = [datetime(2026, 11, d) for d in range(16, 21)]
 
 def turnos_disponibles(evento_id):
     db = get_db()
-    ocupados = {r["fecha_hora"] for r in db.execute(
-        "SELECT fecha_hora FROM reserva WHERE estado='Confirmada'")}
+    ocupados = {r["fecha_hora"] for r in db.execute("SELECT fecha_hora FROM reserva WHERE estado='Confirmada'")}
     momento = ahora()
     agenda = []
     for dia in DIAS_AGENDA:
@@ -396,8 +432,7 @@ def agenda():
 @app.route("/agenda/dr-garcia/<int:evento_id>")
 def agenda_evento(evento_id):
     evento = get_db().execute("SELECT * FROM tipo_evento WHERE id=?", (evento_id,)).fetchone() or abort(404)
-    return render_template("turnos.html", evento=evento, agenda=turnos_disponibles(evento_id),
-                           admin=admin_actual())
+    return render_template("turnos.html", evento=evento, agenda=turnos_disponibles(evento_id), admin=admin_actual())
 
 
 @app.route("/agenda/dr-garcia/<int:evento_id>/reservar", methods=["GET", "POST"])
@@ -428,14 +463,23 @@ def reservar(evento_id):
                 "INSERT INTO reserva (tipo_evento_id, fecha_hora, invitado_nombre, invitado_email, "
                 "invitado_telefono, nota, estado, creada_en, recordatorio_estado) "
                 "VALUES (?,?,?,?,?,?,?,?,?)",
-                (evento_id, fh, datos["nombre"], datos["email"], datos["telefono"], datos["nota"],
-                 "Confirmada", momento.isoformat(), recordatorio))
+                (
+                    evento_id,
+                    fh,
+                    datos["nombre"],
+                    datos["email"],
+                    datos["telefono"],
+                    datos["nota"],
+                    "Confirmada",
+                    momento.isoformat(),
+                    recordatorio,
+                ),
+            )
             r = reserva_completa(cur.lastrowid)
-            enviar_confirmacion(r)          # M06-R01F
-            notificar_admin("nueva", r)      # M06-R02F
+            enviar_confirmacion(r)  # M06-R01F
+            notificar_admin("nueva", r)  # M06-R02F
             return redirect(url_for("reserva_confirmada", rid=r["id"]))
-    return render_template("reservar.html", evento=evento, fh=fh, datos=datos, errores=errores,
-                           admin=admin_actual())
+    return render_template("reservar.html", evento=evento, fh=fh, datos=datos, errores=errores, admin=admin_actual())
 
 
 @app.route("/confirmada/<int:rid>")
@@ -450,7 +494,9 @@ def reserva_invitado(rid):
         get_db().execute(
             "UPDATE reserva SET estado='Cancelada', cancelada_por='invitado', motivo_cancelacion=?, "
             "recordatorio_estado=CASE WHEN recordatorio_estado='programado' THEN 'cancelado' "
-            "ELSE recordatorio_estado END WHERE id=?", (request.form.get("motivo", "").strip(), rid))
+            "ELSE recordatorio_estado END WHERE id=?",
+            (request.form.get("motivo", "").strip(), rid),
+        )
         notificar_admin("cancelacion", reserva_completa(rid))  # US-M06-002, Escenario 2
         flash("Tu reserva fue cancelada.")
         return redirect(url_for("reserva_invitado", rid=rid))
@@ -466,7 +512,8 @@ def panel():
     db = get_db()
     reservas = db.execute(
         "SELECT r.*, t.nombre AS evento FROM reserva r JOIN tipo_evento t ON t.id=r.tipo_evento_id "
-        "ORDER BY r.fecha_hora").fetchall()
+        "ORDER BY r.fecha_hora"
+    ).fetchall()
     alertas = db.execute("SELECT * FROM alerta ORDER BY id DESC LIMIT 10").fetchall()
     return render_template("panel.html", reservas=reservas, alertas=alertas)
 
@@ -476,8 +523,10 @@ def panel():
 def api_alertas():
     db = get_db()
     alertas = db.execute("SELECT * FROM alerta ORDER BY id DESC LIMIT 10").fetchall()
-    return jsonify(badge=db.execute("SELECT COUNT(*) FROM alerta WHERE leida=0").fetchone()[0],
-                   html=render_template("_alertas.html", alertas=alertas))
+    return jsonify(
+        badge=db.execute("SELECT COUNT(*) FROM alerta WHERE leida=0").fetchone()[0],
+        html=render_template("_alertas.html", alertas=alertas),
+    )
 
 
 @app.route("/admin/alertas/leidas", methods=["POST"])
@@ -505,7 +554,9 @@ def cancelar_reserva(rid):
         db.execute(
             "UPDATE reserva SET estado='Cancelada', cancelada_por='admin', motivo_cancelacion=?, "
             "recordatorio_estado=CASE WHEN recordatorio_estado='programado' THEN 'cancelado' "
-            "ELSE recordatorio_estado END WHERE id=?", (motivo, rid))
+            "ELSE recordatorio_estado END WHERE id=?",
+            (motivo, rid),
+        )
         r = reserva_completa(rid)
         if notificar:
             enviar_cancelacion(r)
@@ -524,9 +575,14 @@ def recordatorios():
         n = ejecutar_job_recordatorios()
         flash(f"Job de recordatorios ejecutado: {n} recordatorio(s) enviado(s).")
         return redirect(url_for("recordatorios"))
-    filas = get_db().execute(
-        "SELECT r.*, t.nombre AS evento FROM reserva r JOIN tipo_evento t ON t.id=r.tipo_evento_id "
-        "ORDER BY r.fecha_hora").fetchall()
+    filas = (
+        get_db()
+        .execute(
+            "SELECT r.*, t.nombre AS evento FROM reserva r JOIN tipo_evento t ON t.id=r.tipo_evento_id "
+            "ORDER BY r.fecha_hora"
+        )
+        .fetchall()
+    )
     return render_template("recordatorios.html", filas=filas)
 
 
@@ -550,8 +606,14 @@ def historial():
         vacio = f"No se encontraron notificaciones con estado {estado} en los últimos 60 días"
     else:
         vacio = "No se encontraron notificaciones para los filtros seleccionados en los últimos 60 días"
-    return render_template("historial.html", filas=filas, tipo=tipo, estado=estado, vacio=vacio,
-                           tipos=["Todos", "Confirmación", "Recordatorio", "Cancelación", "Aviso al admin"])
+    return render_template(
+        "historial.html",
+        filas=filas,
+        tipo=tipo,
+        estado=estado,
+        vacio=vacio,
+        tipos=["Todos", "Confirmación", "Recordatorio", "Cancelación", "Aviso al admin"],
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -561,8 +623,7 @@ def plantillas_por_tipo():
     db = get_db()
     grupos = []
     for tipo in TIPOS_PLANTILLA:
-        filas = db.execute("SELECT * FROM plantilla WHERE tipo=? ORDER BY por_defecto DESC, nombre",
-                           (tipo,)).fetchall()
+        filas = db.execute("SELECT * FROM plantilla WHERE tipo=? ORDER BY por_defecto DESC, nombre", (tipo,)).fetchall()
         grupos.append((tipo, filas))
     return grupos
 
@@ -575,8 +636,11 @@ def validar_campos(form, plantilla_id=None):
     for campo, limite in LIMITES.items():
         if len(datos[campo]) > limite:
             errores[campo] = f"Máximo {limite} caracteres ({len(datos[campo])} ingresados)."
-    duplicada = get_db().execute("SELECT id FROM plantilla WHERE lower(trim(nombre))=lower(trim(?))",
-                                 (datos["nombre"],)).fetchone()
+    duplicada = (
+        get_db()
+        .execute("SELECT id FROM plantilla WHERE lower(trim(nombre))=lower(trim(?))", (datos["nombre"],))
+        .fetchone()
+    )
     if duplicada and duplicada["id"] != plantilla_id:
         errores["nombre"] = MSG_NOMBRE_DUPLICADO  # US-M06-004, Escenario 4
     for campo in ("asunto", "saludo", "cuerpo", "firma"):
@@ -611,14 +675,25 @@ def plantilla_nueva():
             db.execute(
                 "INSERT INTO plantilla (nombre, tipo, asunto, saludo, cuerpo, firma, por_defecto, autor, creada_en) "
                 "VALUES (?,?,?,?,?,?,?,?,?)",
-                (datos["nombre"], datos["tipo"], datos["asunto"], datos["saludo"], datos["cuerpo"],
-                 datos["firma"], por_defecto, session["admin"], ahora().isoformat()))
+                (
+                    datos["nombre"],
+                    datos["tipo"],
+                    datos["asunto"],
+                    datos["saludo"],
+                    datos["cuerpo"],
+                    datos["firma"],
+                    por_defecto,
+                    session["admin"],
+                    ahora().isoformat(),
+                ),
+            )
             flash("Plantilla creada correctamente")
             for a in avisos:
                 flash(a)
             return redirect(url_for("plantillas"))
-    return render_template("plantilla_form.html", datos=datos, errores=errores, tipos=TIPOS_PLANTILLA,
-                           modo="nueva", limites=LIMITES)
+    return render_template(
+        "plantilla_form.html", datos=datos, errores=errores, tipos=TIPOS_PLANTILLA, modo="nueva", limites=LIMITES
+    )
 
 
 @app.route("/admin/plantillas/<int:pid>/editar", methods=["GET", "POST"])
@@ -634,40 +709,84 @@ def plantilla_editar(pid):
         datos["por_defecto"] = 1 if request.form.get("por_defecto") == "on" else 0
         datos["id"] = pid
         if request.form.get("accion") == "preview" and not errores:
-            ejemplo = {"nombre_invitado": "María García", "nombre_profesional": "Dr. García",
-                       "fecha_turno": "miércoles 18 de noviembre de 2026", "hora_turno": "10:30",
-                       "fecha_corta": "18/11/2026", "tipo_evento": "Consulta inicial - 30 min"}
+            ejemplo = {
+                "nombre_invitado": "María García",
+                "nombre_profesional": "Dr. García",
+                "fecha_turno": "miércoles 18 de noviembre de 2026",
+                "hora_turno": "10:30",
+                "fecha_corta": "18/11/2026",
+                "tipo_evento": "Consulta inicial - 30 min",
+            }
             preview = {k: completar(datos[k], ejemplo) for k in ("asunto", "saludo", "cuerpo", "firma")}
         elif not errores:
-            otras = db.execute("SELECT * FROM plantilla WHERE tipo=? AND id<>? ORDER BY id",
-                               (p["tipo"], pid)).fetchall()
+            otras = db.execute(
+                "SELECT * FROM plantilla WHERE tipo=? AND id<>? ORDER BY id", (p["tipo"], pid)
+            ).fetchall()
             if p["por_defecto"] and not datos["por_defecto"]:
                 if not otras:  # US-M06-005, Escenario 4
                     errores["por_defecto"] = MSG_TICK_UNICA
-                    return render_template("plantilla_form.html", datos=datos, errores=errores,
-                                           tipos=TIPOS_PLANTILLA, modo="editar", limites=LIMITES,
-                                           preview=None, error_general=MSG_TICK_UNICA)
+                    return render_template(
+                        "plantilla_form.html",
+                        datos=datos,
+                        errores=errores,
+                        tipos=TIPOS_PLANTILLA,
+                        modo="editar",
+                        limites=LIMITES,
+                        preview=None,
+                        error_general=MSG_TICK_UNICA,
+                    )
                 db.execute("UPDATE plantilla SET por_defecto=1 WHERE id=?", (otras[0]["id"],))
                 avisos.append(f"'{otras[0]['nombre']}' pasó a ser la plantilla por defecto del tipo.")
             if datos["por_defecto"] and not p["por_defecto"]:
                 db.execute("UPDATE plantilla SET por_defecto=0 WHERE tipo=?", (p["tipo"],))
                 avisos.append("★ Esta plantilla es ahora la por defecto. La anterior quedó como alternativa.")
             # guardar versión anterior en el historial (máx. 5)
-            db.execute("INSERT INTO plantilla_version (plantilla_id, asunto, saludo, cuerpo, firma, guardada_en, autor) "
-                       "VALUES (?,?,?,?,?,?,?)", (pid, p["asunto"], p["saludo"], p["cuerpo"], p["firma"],
-                                                  p["modificada_en"] or p["creada_en"], p["modificada_por"] or p["autor"]))
-            db.execute("DELETE FROM plantilla_version WHERE plantilla_id=? AND id NOT IN (SELECT id FROM "
-                       "plantilla_version WHERE plantilla_id=? ORDER BY id DESC LIMIT ?)", (pid, pid, MAX_VERSIONES))
-            db.execute("UPDATE plantilla SET nombre=?, asunto=?, saludo=?, cuerpo=?, firma=?, por_defecto=?, "
-                       "modificada_por=?, modificada_en=? WHERE id=?",
-                       (datos["nombre"], datos["asunto"], datos["saludo"], datos["cuerpo"], datos["firma"],
-                        datos["por_defecto"], session["admin"], ahora().isoformat(), pid))
+            db.execute(
+                "INSERT INTO plantilla_version (plantilla_id, asunto, saludo, cuerpo, firma, guardada_en, autor) "
+                "VALUES (?,?,?,?,?,?,?)",
+                (
+                    pid,
+                    p["asunto"],
+                    p["saludo"],
+                    p["cuerpo"],
+                    p["firma"],
+                    p["modificada_en"] or p["creada_en"],
+                    p["modificada_por"] or p["autor"],
+                ),
+            )
+            db.execute(
+                "DELETE FROM plantilla_version WHERE plantilla_id=? AND id NOT IN (SELECT id FROM "
+                "plantilla_version WHERE plantilla_id=? ORDER BY id DESC LIMIT ?)",
+                (pid, pid, MAX_VERSIONES),
+            )
+            db.execute(
+                "UPDATE plantilla SET nombre=?, asunto=?, saludo=?, cuerpo=?, firma=?, por_defecto=?, "
+                "modificada_por=?, modificada_en=? WHERE id=?",
+                (
+                    datos["nombre"],
+                    datos["asunto"],
+                    datos["saludo"],
+                    datos["cuerpo"],
+                    datos["firma"],
+                    datos["por_defecto"],
+                    session["admin"],
+                    ahora().isoformat(),
+                    pid,
+                ),
+            )
             flash("Plantilla actualizada correctamente")
             for a in avisos:
                 flash(a)
             return redirect(url_for("plantillas"))
-    return render_template("plantilla_form.html", datos=datos, errores=errores, tipos=TIPOS_PLANTILLA,
-                           modo="editar", limites=LIMITES, preview=preview)
+    return render_template(
+        "plantilla_form.html",
+        datos=datos,
+        errores=errores,
+        tipos=TIPOS_PLANTILLA,
+        modo="editar",
+        limites=LIMITES,
+        preview=preview,
+    )
 
 
 @app.route("/admin/plantillas/<int:pid>/historial")
@@ -675,8 +794,7 @@ def plantilla_editar(pid):
 def plantilla_historial(pid):
     db = get_db()
     p = db.execute("SELECT * FROM plantilla WHERE id=?", (pid,)).fetchone() or abort(404)
-    versiones = db.execute("SELECT * FROM plantilla_version WHERE plantilla_id=? ORDER BY id DESC",
-                           (pid,)).fetchall()
+    versiones = db.execute("SELECT * FROM plantilla_version WHERE plantilla_id=? ORDER BY id DESC", (pid,)).fetchall()
     return render_template("plantilla_historial.html", p=p, versiones=versiones)
 
 
@@ -686,11 +804,23 @@ def plantilla_restaurar(pid, vid):
     db = get_db()
     p = db.execute("SELECT * FROM plantilla WHERE id=?", (pid,)).fetchone() or abort(404)
     v = db.execute("SELECT * FROM plantilla_version WHERE id=? AND plantilla_id=?", (vid, pid)).fetchone() or abort(404)
-    db.execute("INSERT INTO plantilla_version (plantilla_id, asunto, saludo, cuerpo, firma, guardada_en, autor) "
-               "VALUES (?,?,?,?,?,?,?)", (pid, p["asunto"], p["saludo"], p["cuerpo"], p["firma"],
-                                          p["modificada_en"] or p["creada_en"], p["modificada_por"] or p["autor"]))
-    db.execute("UPDATE plantilla SET asunto=?, saludo=?, cuerpo=?, firma=?, modificada_por=?, modificada_en=? WHERE id=?",
-               (v["asunto"], v["saludo"], v["cuerpo"], v["firma"], session["admin"], ahora().isoformat(), pid))
+    db.execute(
+        "INSERT INTO plantilla_version (plantilla_id, asunto, saludo, cuerpo, firma, guardada_en, autor) "
+        "VALUES (?,?,?,?,?,?,?)",
+        (
+            pid,
+            p["asunto"],
+            p["saludo"],
+            p["cuerpo"],
+            p["firma"],
+            p["modificada_en"] or p["creada_en"],
+            p["modificada_por"] or p["autor"],
+        ),
+    )
+    db.execute(
+        "UPDATE plantilla SET asunto=?, saludo=?, cuerpo=?, firma=?, modificada_por=?, modificada_en=? WHERE id=?",
+        (v["asunto"], v["saludo"], v["cuerpo"], v["firma"], session["admin"], ahora().isoformat(), pid),
+    )
     flash("Versión restaurada correctamente")
     return redirect(url_for("plantilla_historial", pid=pid))
 
@@ -720,12 +850,17 @@ def plantilla_eliminar(pid):
 def buzon():
     email = request.args.get("email", "").strip()
     db = get_db()
-    destinatarios = [r[0] for r in db.execute(
-        "SELECT DISTINCT destinatario FROM notificacion WHERE estado='enviado' ORDER BY destinatario")]
+    destinatarios = [
+        r[0]
+        for r in db.execute(
+            "SELECT DISTINCT destinatario FROM notificacion WHERE estado='enviado' ORDER BY destinatario"
+        )
+    ]
     mensajes = []
     if email:
-        mensajes = db.execute("SELECT * FROM notificacion WHERE destinatario=? AND estado='enviado' "
-                              "ORDER BY id DESC", (email,)).fetchall()
+        mensajes = db.execute(
+            "SELECT * FROM notificacion WHERE destinatario=? AND estado='enviado' ORDER BY id DESC", (email,)
+        ).fetchall()
     return render_template("buzon.html", email=email, mensajes=mensajes, destinatarios=destinatarios)
 
 
@@ -741,6 +876,7 @@ def buzon_mensaje(nid):
 @app.route("/entorno", methods=["GET", "POST"])
 def entorno():
     from escenarios import ESCENARIOS
+
     if request.method == "POST":
         accion = request.form.get("accion")
         if accion == "reloj":
@@ -761,6 +897,7 @@ def entorno():
 if __name__ == "__main__":
     if not os.path.exists(DB_PATH):
         from escenarios import preparar_base
+
         with app.app_context():
             preparar_base()
     app.run(debug=True, port=5000)

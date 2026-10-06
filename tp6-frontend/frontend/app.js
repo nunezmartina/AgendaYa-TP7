@@ -15,7 +15,7 @@ function calcularEsPorDefecto({ existeOtraPlantillaDelTipo, tickActivado }) {
 
 // --- Estado en memoria -------------------------------------------------
 const plantillas = []; // { nombre, tipo, asunto, saludo, cuerpo, firma, porDefecto }
-const historial = [];  // { tipo, email, estado }
+const historial = []; // { tipo, email, estado }
 
 // --- Navegación por tabs -------------------------------------------------
 document.querySelectorAll('.tab-btn').forEach((btn) => {
@@ -93,7 +93,9 @@ formPlantilla.addEventListener('submit', (e) => {
 const formSimular = document.getElementById('form-simular');
 const errorEmailInvalido = document.querySelector('[data-cy="error-email-invalido"]');
 const errorEnvioFallido = document.querySelector('[data-cy="error-envio-fallido"]');
-const notificacionEnviadaOk = document.querySelector('[data-cy="notificacion-enviada-confirmacion"]');
+const notificacionEnviadaOk = document.querySelector(
+  '[data-cy="notificacion-enviada-confirmacion"]',
+);
 const historialEnvios = document.getElementById('historial-envios');
 
 function renderHistorial() {
