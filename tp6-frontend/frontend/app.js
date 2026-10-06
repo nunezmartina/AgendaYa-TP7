@@ -76,11 +76,10 @@ formPlantilla.addEventListener('submit', (e) => {
   const esPorDefecto = calcularEsPorDefecto({ existeOtraPlantillaDelTipo, tickActivado });
 
   if (esPorDefecto) {
-    // Desplaza a la anterior por defecto del mismo tipo
+   // Solo puede haber una plantilla por defecto: se desmarca la anterior
     plantillas.forEach((p) => {
-      if (p.tipo === tipo) p.porDefecto = false;
+      p.porDefecto = false;
     });
-  }
 
   plantillas.push({ nombre, tipo, asunto, saludo, cuerpo, firma, porDefecto: esPorDefecto });
 
